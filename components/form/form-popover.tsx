@@ -63,7 +63,7 @@ export const FormPopover = (
                 <div className="text-sm font-medium text-center text-neutral-600 pb-4">
                     Create board
                 </div>
-                <PopoverClose ref={closeRef} asChild>
+                <PopoverClose asChild ref={closeRef}>
                     <Button className="h-auto w-auto p-2 absolute top-1 right-1 hover:bg-zinc-50">
                         <X className="h-4 w-4"/>
                     </Button>

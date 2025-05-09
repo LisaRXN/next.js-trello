@@ -9,6 +9,7 @@ interface BoardIdPageProps {
   };
 }
 const BoardIdPage = async ({ params }: BoardIdPageProps) => {
+  
   const { orgId } = await auth();
 
   if (!orgId) {

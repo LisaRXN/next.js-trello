@@ -6,6 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useAction } from "@/hooks/use-actions";
 import { PopoverClose } from "@radix-ui/react-popover";
 import { MoreHorizontal, X  } from "lucide-react";
+import { toast } from "sonner";
 
 interface BoardOptionsProps {
     id: string;

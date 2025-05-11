@@ -1,48 +1,55 @@
-"use server"
+"use server";
 
-import { InputType, ReturnType } from "./types"
-import { db } from '../../lib/db';
+import { InputType, ReturnType } from "./types";
+import { db } from "../../lib/db";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
-import { createSafeAction } from '@/lib/create-safe-action'
-import { DeleteList } from './schema';
-
+import { createSafeAction } from "@/lib/create-safe-action";
+import { DeleteList } from "./schema";
+import { createAuditLog } from "@/lib/create-audit-log";
+import { ACTION, ENTITY_TYPE } from "@/lib/generated/prisma";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
+  const { userId, orgId } = await auth();
 
-  const { userId, orgId } = await auth()
-
-  if(!userId || !orgId){
+  if (!userId || !orgId) {
     return {
-      error: "Unauthorized"
-    }
+      error: "Unauthorized",
+    };
   }
 
-  const {id, boardId } = data;
+  const { id, boardId } = data;
 
   let list;
 
-  try{
+  try {
     list = await db.list.delete({
-      where:{
+      where: {
         id,
         boardId,
         board: {
-          orgId
-        }
-      }
-    })
+          orgId,
+        },
+      },
+    });
 
-  }catch(error){
-    console.error(error)
-    await db.$disconnect()
+    await createAuditLog({
+      entityId: list.id,
+      entityTitle: list.title,
+      entityType: ENTITY_TYPE.LIST,
+      action: ACTION.DELETE,
+    });
+    
+  } catch (error) {
+    console.error(error);
+    await db.$disconnect();
     return {
       error: "Failed to delete",
-    }
+    };
   }
-  
-  revalidatePath(`/board/${boardId}`);
-  return {data: list};
-}
 
-export const deleteList = createSafeAction(DeleteList, handler)
+  revalidatePath(`/board/${boardId}`);
+  return { data: list };
+};
+
+export const deleteList = createSafeAction(DeleteList, handler);

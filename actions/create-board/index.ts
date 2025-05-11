@@ -1,36 +1,43 @@
-"use server"
+"use server";
 
-import { InputType, ReturnType } from "./types"
-import { db } from '../../lib/db';
+import { InputType, ReturnType } from "./types";
+import { db } from "../../lib/db";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
-import { createSafeAction } from '@/lib/create-safe-action'
-import { CreateBoard } from './schema';
-
+import { createSafeAction } from "@/lib/create-safe-action";
+import { CreateBoard } from "./schema";
+import { createAuditLog } from "@/lib/create-audit-log";
+import { ACTION, ENTITY_TYPE } from "@/lib/generated/prisma";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
+  const { userId, orgId } = await auth();
 
-  const { userId, orgId } = await auth()
-
-  if(!userId || !orgId){
+  if (!userId || !orgId) {
     return {
-      error: "Unauthorized"
-    }
+      error: "Unauthorized",
+    };
   }
 
   const { title, image } = data;
-  
-  const [imageId, imageThumbUrl, imageFullUrl, imageLinkHTML, imageUserName] = image.split('|')
 
-  if(!imageId || !imageThumbUrl || !imageFullUrl || !imageLinkHTML || !imageUserName){
-    return{
-      error: "Missing fields. Failed te create board."
-    }
+  const [imageId, imageThumbUrl, imageFullUrl, imageLinkHTML, imageUserName] =
+    image.split("|");
+
+  if (
+    !imageId ||
+    !imageThumbUrl ||
+    !imageFullUrl ||
+    !imageLinkHTML ||
+    !imageUserName
+  ) {
+    return {
+      error: "Missing fields. Failed te create board.",
+    };
   }
 
   let board;
 
-  try{
+  try {
     board = await db.board.create({
       data: {
         title,
@@ -39,20 +46,27 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         imageThumbUrl,
         imageFullUrl,
         imageLinkHTML,
-        imageUserName
-      }
-    })
+        imageUserName,
+      },
+    });
 
-  }catch(error){
-    console.error(error)
-    await db.$disconnect()
+    await createAuditLog({
+      entityId: board.id,
+      entityTitle: board.title,
+      entityType: ENTITY_TYPE.BOARD,
+      action: ACTION.CREATE,
+    });
+    
+  } catch (error) {
+    console.error(error);
+    await db.$disconnect();
     return {
       error: "Failed to create",
-    }
+    };
   }
-  
-  revalidatePath(`/board/${board.id}`)
-  return { data: board }
-}
 
-export const createBoard = createSafeAction(CreateBoard, handler)
+  revalidatePath(`/board/${board.id}`);
+  return { data: board };
+};
+
+export const createBoard = createSafeAction(CreateBoard, handler);

@@ -4,7 +4,7 @@ import { FormSubmit } from "@/components/form/form-submit";
 import { FormTextarea } from "@/components/form/form-textarea";
 import { Button } from "@/components/ui/button";
 import { Plus, X } from "lucide-react";
-import { forwardRef, KeyboardEventHandler, useRef } from 'react';
+import { forwardRef, KeyboardEventHandler, RefObject, useRef } from 'react';
 import { useAction } from "@/hooks/use-actions";
 import { useEventListener, useOnClickOutside } from "usehooks-ts";
 import { createCard } from "@/actions/create-card";
@@ -40,7 +40,7 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
       }
     }
 
-    useOnClickOutside(formRef, disableEditing);
+    useOnClickOutside(formRef as RefObject<HTMLFormElement>, disableEditing);
     useEventListener("keydown", onKeyDown)
 
     const onTextareaKeyDown: KeyboardEventHandler<HTMLTextAreaElement> = (e) => {

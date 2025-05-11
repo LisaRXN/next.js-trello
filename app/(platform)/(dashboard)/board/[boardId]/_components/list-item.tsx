@@ -15,7 +15,7 @@ interface ListItemsProps {
 
 export const ListItem = ({ data, index }: ListItemsProps) => {
   const [isEditing, setIsEditing] = useState(false);
-  const textareaRef = useRef<HTMLFormElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const enableEditing = () => {
     setIsEditing(true);

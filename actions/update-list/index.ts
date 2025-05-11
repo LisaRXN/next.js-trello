@@ -1,52 +1,58 @@
-"use server"
+"use server";
 
-import { InputType, ReturnType } from "./types"
-import { db } from '../../lib/db';
+import { InputType, ReturnType } from "./types";
+import { db } from "../../lib/db";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
-import { createSafeAction } from '@/lib/create-safe-action'
-import { UpdateList } from './schema';
-
+import { createSafeAction } from "@/lib/create-safe-action";
+import { UpdateList } from "./schema";
+import { createAuditLog } from "@/lib/create-audit-log";
+import { ACTION, ENTITY_TYPE } from "@/lib/generated/prisma";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
+  const { userId, orgId } = await auth();
 
-  const { userId, orgId } = await auth()
-
-  if(!userId || !orgId){
+  if (!userId || !orgId) {
     return {
-      error: "Unauthorized"
-    }
+      error: "Unauthorized",
+    };
   }
 
   const { title, id, boardId } = data;
-  
 
   let list;
 
-  try{
+  try {
     list = await db.list.update({
-      where:{
+      where: {
         id,
         boardId,
-        board:{
-          orgId
-        }
+        board: {
+          orgId,
+        },
       },
       data: {
         title,
-      }
-    })
+      },
+    });
 
-  }catch(error){
-    console.error(error)
-    await db.$disconnect()
+    await createAuditLog({
+      entityId: list.id,
+      entityTitle: list.title,
+      entityType: ENTITY_TYPE.LIST,
+      action: ACTION.UPDATE,
+    });
+    
+  } catch (error) {
+    console.error(error);
+    await db.$disconnect();
     return {
       error: "Failed to update",
-    }
+    };
   }
-  
-  revalidatePath(`/board/${boardId}`)
-  return { data: list }
-}
 
-export const updateList = createSafeAction(UpdateList, handler)
+  revalidatePath(`/board/${boardId}`);
+  return { data: list };
+};
+
+export const updateList = createSafeAction(UpdateList, handler);

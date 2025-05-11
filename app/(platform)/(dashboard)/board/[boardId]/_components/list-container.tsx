@@ -103,6 +103,7 @@ export const ListContainer = ({ data, boardId }: ListContainerProps) => {
         );
 
         reorderedCards.forEach((card, index) => {
+          
           card.order = index;
         });
 

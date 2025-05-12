@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 
 export async function GET(
   request: Request,
-  { params }: { params: { cardId: string } }
+  { params }: { params: Promise<{ cardId: string }> }
 ) {
   try {
     const { userId, orgId } = await auth();
@@ -13,10 +13,13 @@ export async function GET(
     if (!userId || !orgId) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
+
+    const { cardId } = await params;
+
     const auditLogs = await db.auditLog.findMany({
       where: {
         orgId,
-        entityId: params.cardId,
+        entityId: cardId,
         entityType: ENTITY_TYPE.CARD,
       },
       orderBy: {

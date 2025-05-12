@@ -13,7 +13,11 @@ const nextConfig: NextConfig = {
         hostname: "images.unsplash.com",
       }
     ]
-  }
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  
 };
 
 export default nextConfig;

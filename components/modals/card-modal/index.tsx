@@ -9,7 +9,7 @@ import { Header } from "./header";
 import { Description } from "./description";
 import { Actions } from "./actions";
 import { AuditLog } from "@/lib/generated/prisma";
-import { Activity } from "../activity";
+import { Activity } from "./activity";
 
 export const CardModal = () => {
   const id = useCardModal((state) => state.id);

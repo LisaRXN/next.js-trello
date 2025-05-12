@@ -4,7 +4,7 @@ import { NextRequest } from "next/server";
 
 // Définir les routes publiques
 const isPublicRoute = (req: NextRequest) => {
-  const publicRoutes = ["/","/sign-in"];
+  const publicRoutes = ["/","/sign-in", "/api/webhook"];
   return publicRoutes.includes(req.nextUrl.pathname);
 };
 

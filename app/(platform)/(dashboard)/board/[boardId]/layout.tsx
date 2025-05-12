@@ -28,7 +28,7 @@ export async function generateMetadata({
   };
 }
 
-const boardIdLayout = async ({
+const Layout = async ({
   children,
   params,
 }: {
@@ -66,4 +66,4 @@ const boardIdLayout = async ({
   );
 };
 
-export default boardIdLayout;
+export default Layout;
